@@ -5,7 +5,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url:'https://github.com/YASSMIN161/MyAppReact.git'
+                git branch: 'main', url: 'https://github.com/YASSMIN161/MyAppReact.git'
             }
         }
 
@@ -22,15 +22,15 @@ pipeline {
         }
 
         stage('Stop Old Containers') {
-    steps {
-        bat 'docker compose down'
-        bat 'docker rm -f mongodb server client || exit 0'
-    }
-}
+            steps {
+                bat 'docker-compose down || exit 0'
+                bat 'docker rm -f mongodb server client || exit 0'
+            }
+        }
 
         stage('Run with Docker Compose') {
             steps {
-                bat 'docker compose up -d --build'
+                bat 'docker-compose up -d --build'
             }
         }
 
@@ -47,6 +47,7 @@ pipeline {
         }
         failure {
             echo 'Le pipeline a échoué, consultez les logs.'
+            bat 'docker-compose logs || exit 0'
         }
     }
 }
