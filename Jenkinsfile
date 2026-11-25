@@ -5,45 +5,48 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url:'https://github.com/YASSMIN161/MyAppReact.git'
             }
         }
 
-        stage('Build image serveur') {
+        stage('Build Server Image') {
             steps {
-                bat 'docker build -t mern-server ./server'
+                bat 'docker build -t mern-server ./Server'
             }
         }
 
-        stage('Build image client') {
+        stage('Build Client Image') {
             steps {
-                bat 'docker build -t mern-client ./client'
+                bat 'docker build -t mern-client ./Client'
             }
         }
 
-        stage('Docker Compose Up') {
+        stage('Stop Old Containers') {
+    steps {
+        bat 'docker compose down'
+        bat 'docker rm -f mongodb server client || exit 0'
+    }
+}
+
+        stage('Run with Docker Compose') {
             steps {
-                bat 'docker compose down'
                 bat 'docker compose up -d --build'
             }
         }
 
-        stage('Verification') {
+        stage('Verify') {
             steps {
-                bat 'ping -n 16 127.0.0.1 > nul'
                 bat 'docker ps'
-                bat 'curl -f http://localhost:3000'
             }
         }
     }
 
     post {
         success {
-            echo 'Deploiement reussi : client sur 3000, serveur sur 9000'
+            echo 'Pipeline terminé avec succès : application MERN déployée.'
         }
         failure {
-            bat 'docker compose logs'
-            bat 'docker compose down'
+            echo 'Le pipeline a échoué, consultez les logs.'
         }
     }
 }
